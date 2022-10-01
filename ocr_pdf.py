@@ -6,12 +6,17 @@ def find_pfd_files(file_path):
 
     path_list = []
 
-    # use built-in method to find all files
-    for root, _, files in os.walk(file_path):
-        if root[len(file_path):].count(os.sep) < 1:
-            for name in files:
-                if name.find('.pdf') >= 0:
-                    path_list.append(os.path.join(root, name))
+    contents = os.listdir(file_path)
+
+    for file_name in contents: 
+
+        full_path = os.path.join(file_path, file_name)
+
+        is_file = os.path.isfile(full_path)
+        is_pdf = full_path.endswith('.pdf')
+
+        if is_file and is_pdf:
+            path_list.append(full_path)
 
     return path_list
 
@@ -35,11 +40,7 @@ if __name__ == '__main__':
 
     # for each file (file or directory) scan and save to destination
     for f in files:
-
-        # check source for spaces
-        if f.find(' ') >= 0:
-            f = '"%s"' % f
-        
+       
         # get original source file name and force lower case in destination
         dest_filename = os.path.basename(f)
         dest_filename = dest_filename.lower()
@@ -47,17 +48,13 @@ if __name__ == '__main__':
         # form destination path
         destination_path = os.path.join(args.destination, dest_filename)
 
-        # check destination path for spaces. skip trailing quote
-        if destination_path.find(' ') >= 0:
-            destination_path = '"%s' % destination_path
-
         # command to ocr files
-        cmd = 'ocrmypdf --deskew %s %s' % (f, destination_path)
+        cmd = f'ocrmypdf --deskew "{f}" "{destination_path}"'
         os.system(cmd)
         sleep(1)
 
         # if delete argument is true, then test file existence and delete
         if args.delete:
 
-            if os.path.exists(destination_path.replace('"', '')):
+            if os.path.exists(destination_path):
                 os.remove(f.replace('"', ''))
