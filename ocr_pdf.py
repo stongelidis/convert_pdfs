@@ -1,6 +1,7 @@
 import os
 import argparse
 import logging
+import time
 
 from time import sleep
 from watchdog.observers import Observer
@@ -101,7 +102,7 @@ if __name__ == "__main__":
 
     try:
         while True:
-            pass
+            time.sleep(1)
 
     except KeyboardInterrupt:
         logging.warning("Watchdog service interrupted by keyboard input")
@@ -109,3 +110,4 @@ if __name__ == "__main__":
     finally:
         observer.stop()
         observer.join()
+        logging.info("Watchdog service terminated")
