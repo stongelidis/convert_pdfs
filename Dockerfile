@@ -26,4 +26,4 @@ RUN pip install --upgrade pip
 RUN python3 -m pip install --use-pep517 -r /app/requirements.txt
 
 # Executes python3 with ocr process
-CMD ["python", "ocr_pdf.py", "/app/source", "/app/destination"]
+CMD ["python", "ocr_pdf.py", "/app/source", "/app/destination", "--delete"]
