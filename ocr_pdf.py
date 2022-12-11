@@ -7,26 +7,77 @@ from watchdog.observers.polling import PollingObserver
 from watchdog.events import FileSystemEventHandler
 
 
-def process_pdfs(list_of_files):
+def hold_until_file_is_accessible(file_path):
+
+    while True:
+        try:
+            file = open(file_path)
+            file.close()
+            break
+
+        except OSError as e:
+            logging.warning(f"{e.strerror}: {e.filename}")
+            sleep(5)
+
+
+def get_unique_filename(file_path):
+
+    destination_path = file_path
+
+    # check if path conflict exists
+    if os.path.exists(file_path):
+        increment = 1
+
+        base_directory = os.path.dirname(file_path)
+        base_filename = os.path.basename(file_path)
+
+        # find extension of file name
+        index = base_filename.rfind(".pdf")
+
+        # add a numeric increment to the file name
+        updated_file_name = base_filename[:index] + str(increment).zfill(3) + ".pdf"
+        updated_destination = os.path.join(base_directory, updated_file_name)
+
+        # keep incrementing until no conflict exists
+        while os.path.exists(updated_destination):
+            increment += 1
+            updated_file_name = base_filename[:index] + str(increment).zfill(3) + ".pdf"
+            updated_destination = os.path.join(base_directory, updated_file_name)
+
+            logging.info(
+                f"Conflict exists in destination folder. Updating file name to {updated_file_name}"
+            )
+
+        # update destination path with new unique filename
+        destination_path = updated_destination
+
+    return destination_path
+
+
+def process_pdfs(list_of_files, destination_directory):
 
     # for each file (file or directory) scan and save to destination
     for f in list_of_files:
 
         # get original source file name and force lower case in destination
-        dest_filename = os.path.basename(f)
-        dest_filename = dest_filename.lower()
+        dst_filename = os.path.basename(f).lower()
 
         # form destination path
-        destination_path = os.path.join(args.destination, dest_filename)
+        destination_path = os.path.join(destination_directory, dst_filename)
 
-        logging.info(f"Starting OCR on {os.path.basename(f)}")
+        # check if path conflict exists
+        destination_path = get_unique_filename(destination_path)
+
+        # check that file is not being used by another process
+        logging.info("Checking that file is doing been written")
+        hold_until_file_is_accessible(f)
 
         # command to ocr files
+        logging.info(f"Starting OCR on {os.path.basename(f)}")
         cmd = f'ocrmypdf --deskew "{f}" "{destination_path}"'
         os.system(cmd)
-        sleep(1)
 
-        # if delete argument is true, then test file existence and delete
+        # if delete argument is true, then test file existence in destination directory and delete
         if args.delete:
 
             if os.path.exists(destination_path):
@@ -35,6 +86,8 @@ def process_pdfs(list_of_files):
                 )
                 logging.warning(f"Deleting original file {os.path.basename(f)}")
                 os.remove(f.replace('"', ""))
+
+    logging.info("Waiting for next scan...")
 
 
 def find_pfd_files(file_path):
@@ -58,9 +111,13 @@ def find_pfd_files(file_path):
 
 
 class MonitorFolder(FileSystemEventHandler):
-    def on_create(self, event):
+    def __init__(self, destination_directory):
+        super(MonitorFolder, self).__init__()
+        self.destination_directory = destination_directory
+
+    def on_created(self, event):
         files = find_pfd_files(os.path.dirname(event.src_path))
-        process_pdfs(files)
+        process_pdfs(files, self.destination_directory)
 
 
 logging.basicConfig(
@@ -93,10 +150,12 @@ if __name__ == "__main__":
 
     logging.info(f"Starting Watchdog service on {args.source}")
     if args.delete:
-        logging.info("Delete opton detected. Files will be removed from src directory after scanning")
+        logging.info(
+            "Delete option detected. Files will be removed from src directory after scanning"
+        )
 
     observer = PollingObserver()
-    event_handler = MonitorFolder()
+    event_handler = MonitorFolder(args.destination)
     observer.schedule(event_handler, args.source, recursive=False)
     observer.start()
 
