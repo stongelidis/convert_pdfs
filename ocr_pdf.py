@@ -1,10 +1,9 @@
 import os
 import argparse
 import logging
-import time
 
 from time import sleep
-from watchdog.observers import Observer
+from watchdog.observers.polling import PollingObserver
 from watchdog.events import FileSystemEventHandler
 
 
@@ -59,9 +58,8 @@ def find_pfd_files(file_path):
 
 
 class MonitorFolder(FileSystemEventHandler):
-    def on_created(self, event):
-        print(event.src_path, event.event_type)
-        files = find_pfd_files(args.source)
+    def on_create(self, event):
+        files = find_pfd_files(os.path.dirname(event.src_path))
         process_pdfs(files)
 
 
@@ -94,15 +92,17 @@ if __name__ == "__main__":
         assert False, "Error: destination needs to be a directory path"
 
     logging.info(f"Starting Watchdog service on {args.source}")
+    if args.delete:
+        logging.info("Delete opton detected. Files will be removed from src directory after scanning")
 
-    observer = Observer()
+    observer = PollingObserver()
     event_handler = MonitorFolder()
     observer.schedule(event_handler, args.source, recursive=False)
     observer.start()
 
     try:
-        while True:
-            time.sleep(1)
+        while observer.is_alive():
+            observer.join(1)
 
     except KeyboardInterrupt:
         logging.warning("Watchdog service interrupted by keyboard input")
