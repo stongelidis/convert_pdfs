@@ -24,5 +24,14 @@ docker build -t ocr_pdf .
 To run the docker container from the command line
 
 ```
-docker run -d --restart=unless-stopped -v "<insert source directory>:/source" -v "<insert destination directory:/destination" --name <insert name here> ocr_pdf
+docker run -d --restart=unless-stopped -v "<insert source directory>:/app/source" -v "<insert destination directory:/app/destination" --name <insert name here> ocr_pdf
+```
+Or to run using docker-compose, add this to your services
+```
+ocr:
+  container_name: ocr_pdf
+  image: ocr_pdf:latest
+  volumes:
+    - <directory_where_scans_located>:/app/source
+    - <directory_to_put_ocr_products>:/app/destination
 ```
