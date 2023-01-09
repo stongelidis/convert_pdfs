@@ -1,10 +1,9 @@
-FROM alpine:latest
+FROM python:3.11.1-slim-bullseye
 
-# Update all packages on OS
-RUN apk upgrade -U --available
-
-# Updates the package index and installs python3 in the alpine container
-RUN apk --update add python3 ocrmypdf py3-pip
+# update packages and install necessary applications
+RUN apt-get update && apt-get install -y \
+  ocrmypdf \
+  python3-venv
 
 # Create app, source, and destination directories
 RUN mkdir -p /app && mkdir -p /app/source && mkdir -p /app/destination
@@ -21,9 +20,8 @@ WORKDIR /app
 COPY ocr_pdf.py .
 COPY requirements.txt .
 
-# install python requirements
-RUN pip install --upgrade pip
-RUN python3 -m pip install --use-pep517 -r /app/requirements.txt
+# update python pip and install requirements
+RUN pip install --upgrade pip && python3 -m pip install --use-pep517 -r /app/requirements.txt
 
 # Executes python3 with ocr process
 CMD ["python", "ocr_pdf.py", "/app/source", "/app/destination", "--delete"]
