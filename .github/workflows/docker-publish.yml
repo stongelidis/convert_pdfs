@@ -1,6 +1,16 @@
 name: ci
 
 on:
+  workflow_dispatch:
+    inputs:
+      print_tags:
+        description: 'True to print to STDOUT'
+        required: true 
+        type: boolean 
+      tags:
+        description: 'Test scenario tags'
+        required: true 
+        type: string
   push:
     tags:
       - "v*.*"
