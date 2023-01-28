@@ -14,8 +14,8 @@ on:
   push:
     branches:
       - integrate_cli
-    tags:
-      - "v*.*"
+#    tags:
+#      - "v*.*"
       
 jobs:
   docker:
@@ -33,9 +33,10 @@ jobs:
           images: |
             stongelidis/convert_pdfs
             ghcr.io/stongelidis/convert_pdfs
-          flavor: latest=true
+
           # generate Docker tags based on the following events/attributes
-          tags: |            
+          tags: |
+            type=ref,event=branch
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern=v{{major}}
