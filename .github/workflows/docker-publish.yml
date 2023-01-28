@@ -1,4 +1,4 @@
-name: ci
+name: publish docker
 
 on:
   workflow_dispatch:
@@ -12,10 +12,10 @@ on:
         required: true 
         type: string
   push:
-    branches:
-      - integrate_cli
+#    branches:
+#      - integrate_cli
     tags:
-      - "v*.*"
+      - "v*"
       
 jobs:
   docker:
@@ -37,9 +37,6 @@ jobs:
           tags: |
             type=ref,event=branch
             type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern=v{{major}}
-            type=semver,pattern=v{{major}}.{{minor}}
       -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v2
