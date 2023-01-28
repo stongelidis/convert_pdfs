@@ -14,8 +14,8 @@ on:
   push:
     branches:
       - integrate_cli
-#    tags:
-#      - "v*.*"
+    tags:
+      - "v*.*"
       
 jobs:
   docker:
@@ -36,7 +36,6 @@ jobs:
 
           # generate Docker tags based on the following events/attributes
           tags: |
-            type=ref,event=branch
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern=v{{major}}
@@ -61,5 +60,5 @@ jobs:
         with:
           context: .
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
+          tags:  ${{ env.REGISTRY }}/${{ github.repository }}/ocr_pdf:${{ github.tags }}
           labels: ${{ steps.meta.outputs.labels }}
