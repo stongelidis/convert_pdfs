@@ -33,7 +33,7 @@ jobs:
           images: |
             stongelidis/convert_pdfs
             ghcr.io/stongelidis/convert_pdfs
-
+          latest: auto
           # generate Docker tags based on the following events/attributes
           tags: |
             type=semver,pattern={{version}}
@@ -60,5 +60,5 @@ jobs:
         with:
           context: .
           push: ${{ github.event_name != 'pull_request' }}
-          tags:  ${{ env.REGISTRY }}/${{ github.repository }}/ocr_pdf:${{ github.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags:  ${{ env.REGISTRY }}/stongelidis/ocr_pdf:${{ steps.meta.outputs.tags }}
+          # labels: ${{ steps.meta.outputs.labels }}
