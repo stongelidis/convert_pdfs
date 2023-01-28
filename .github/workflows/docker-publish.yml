@@ -12,6 +12,8 @@ on:
         required: true 
         type: string
   push:
+    branches:
+      - integrate_cli
     tags:
       - "v*.*"
       
@@ -31,12 +33,13 @@ jobs:
           images: |
             stongelidis/convert_pdfs
             ghcr.io/stongelidis/convert_pdfs
-          
+          flavor: latest=true
           # generate Docker tags based on the following events/attributes
           tags: |            
             type=semver,pattern={{version}}
-            type=semver,pattern=v{{major}}.{{minor}}
+            type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern=v{{major}}
+            type=semver,pattern=v{{major}}.{{minor}}
       -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v2
