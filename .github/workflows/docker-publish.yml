@@ -1,4 +1,4 @@
-name: ci
+name: publish_docker
 
 on:
   workflow_dispatch:
@@ -13,7 +13,7 @@ on:
         type: string
   push:
     tags:
-      - "v*.*"
+      - "v*"
       
 jobs:
   docker:
@@ -29,14 +29,11 @@ jobs:
         with:
           # list of Docker images to use as base name for tags
           images: |
-            stongelidis/convert_pdfs
-            ghcr.io/stongelidis/convert_pdfs
-          
+            ghcr.io/stongelidis/ocr_pdfs
+          latest: auto
           # generate Docker tags based on the following events/attributes
-          tags: |            
+          tags: |
             type=semver,pattern={{version}}
-            type=semver,pattern=v{{major}}.{{minor}}
-            type=semver,pattern=v{{major}}
       -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v2
@@ -56,6 +53,6 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
+          push: true
+          tags:  ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

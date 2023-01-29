@@ -69,7 +69,7 @@ def process_pdfs(list_of_files, destination_directory):
         destination_path = get_unique_filename(destination_path)
 
         # check that file is not being used by another process
-        logging.info("Checking that file is doing been written")
+        logging.info("Checking that file if file is being written")
         hold_until_file_is_accessible(f)
 
         # command to ocr files
