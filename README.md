@@ -22,7 +22,7 @@ To build the docker image, use the command
 docker build -t ocr_pdf .
 ```
 To run the docker container from the command line
-
+ 
 ```
 docker run -d --restart=unless-stopped -v "<insert source directory>:/app/source" -v "<insert destination directory:/app/destination" --name <insert name here> ocr_pdf
 ```
