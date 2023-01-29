@@ -1,4 +1,4 @@
-name: publish docker
+name: publish_docker
 
 on:
   workflow_dispatch:
@@ -35,7 +35,6 @@ jobs:
           latest: auto
           # generate Docker tags based on the following events/attributes
           tags: |
-            type=ref,event=branch
             type=semver,pattern={{version}}
       -
         name: Set up QEMU
