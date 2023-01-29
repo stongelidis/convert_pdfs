@@ -12,8 +12,6 @@ on:
         required: true 
         type: string
   push:
-#    branches:
-#      - integrate_cli
     tags:
       - "v*"
       
