@@ -90,11 +90,18 @@ def process_pdfs(list_of_files, destination_directory):
     logging.info("Waiting for next scan...")
 
 
-def find_pfd_files(file_path):
+def find_pdf_files(file_path):
 
+    # if event triggered by PDF then only return this specific file
+    event_src_is_pdf = file_path.endswith(".pdf")
+    if event_src_is_pdf:
+        return [file_path]
+
+    # else find all pdfs in source directory
     path_list = []
 
-    contents = os.listdir(file_path)
+    src_directory = os.path.dirname(file_path)
+    contents = os.listdir(src_directory)
 
     for file_name in contents:
 
@@ -116,7 +123,7 @@ class MonitorFolder(FileSystemEventHandler):
         self.destination_directory = destination_directory
 
     def on_created(self, event):
-        files = find_pfd_files(os.path.dirname(event.src_path))
+        files = find_pdf_files(event.src_path)
         process_pdfs(files, self.destination_directory)
 
 
@@ -170,3 +177,5 @@ if __name__ == "__main__":
         observer.stop()
         observer.join()
         logging.info("Watchdog service terminated")
+
+    logging.warning(msg)("***** Service stopped *****")

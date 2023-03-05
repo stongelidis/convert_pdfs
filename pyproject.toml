@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "convert-pdfs"
+version = "0.1.0"
+description = "monitor folder for pdfs and use OCR software to provide searchable text in pdf"
+authors = ["Stephen Tongelidis <30709308+stongelidis@users.noreply.github.com>"]
+readme = "README.md"
+packages = [{include = "convert_pdfs"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+argparse = "^1.4.0"
+watchdog = "^2.1.9"
+black = "^22.10.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
