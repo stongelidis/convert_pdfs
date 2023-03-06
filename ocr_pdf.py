@@ -178,4 +178,4 @@ if __name__ == "__main__":
         observer.join()
         logging.info("Watchdog service terminated")
 
-    logging.warning(msg)("***** Service stopped *****")
+    logging.warning("***** Service stopped *****")
