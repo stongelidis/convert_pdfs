@@ -69,7 +69,7 @@ def process_pdfs(list_of_files, destination_directory):
         destination_path = get_unique_filename(destination_path)
 
         # check that file is not being used by another process
-        logging.info("Checking that file if file is being written")
+        logging.info("Checking if file is being written")
         hold_until_file_is_accessible(f)
 
         # command to ocr files
@@ -95,17 +95,19 @@ def find_pdf_files(file_path):
     # if event triggered by PDF then only return this specific file
     event_src_is_pdf = file_path.endswith(".pdf")
     if event_src_is_pdf:
+        logging.info(f"Returning one file for processing.")
         return [file_path]
+
+    src_directory = os.path.dirname(file_path)
+    logging.info(f"File is not PDF. Searching for PDFs within folder {src_directory}")
 
     # else find all pdfs in source directory
     path_list = []
-
-    src_directory = os.path.dirname(file_path)
     contents = os.listdir(src_directory)
 
     for file_name in contents:
 
-        full_path = os.path.join(file_path, file_name)
+        full_path = os.path.join(src_directory, file_name)
 
         is_file = os.path.isfile(full_path)
         is_pdf = full_path.endswith(".pdf")
@@ -121,9 +123,14 @@ class MonitorFolder(FileSystemEventHandler):
     def __init__(self, destination_directory):
         super(MonitorFolder, self).__init__()
         self.destination_directory = destination_directory
+        logging.info(f"Destination directory set to {destination_directory}")
 
     def on_created(self, event):
+
+        logging.info(f"New file found: {os.path.basename(event.src_path)}")
         files = find_pdf_files(event.src_path)
+
+        logging.info(f"Processing {len(files)} file(s)")
         process_pdfs(files, self.destination_directory)
 
 
@@ -147,7 +154,7 @@ if __name__ == "__main__":
     # get arguments
     args = parser.parse_args()
 
-    logging.info("Processing arguments")
+    logging.info("Setting arguments")
 
     if not os.path.isdir(args.source):
         assert False, "Error: source needs to be a directory path"
@@ -158,7 +165,7 @@ if __name__ == "__main__":
     logging.info(f"Starting Watchdog service on {args.source}")
     if args.delete:
         logging.info(
-            "Delete option detected. Files will be removed from src directory after scanning"
+            "Delete option detected. Files will be removed from source directory after scanning"
         )
 
     observer = PollingObserver()
@@ -168,10 +175,13 @@ if __name__ == "__main__":
 
     try:
         while observer.is_alive():
-            observer.join(1)
+            sleep(1)
 
     except KeyboardInterrupt:
         logging.warning("Watchdog service interrupted by keyboard input")
+
+    except Exception as e:
+        logging.warning(str(e))
 
     finally:
         observer.stop()
